@@ -1,42 +1,42 @@
 import json
 
-# import requests
+def add(num1, num2):
+    return num1 + num2
 
+def subtract(num1, num2):
+    return num1 - num2
 
+def multiply(num1, num2):
+    return num1 * num2
+
+def divide(num1, num2):
+    return num1 / num2
+
+# lambda function handler
 def lambda_handler(event, context):
-    """Sample pure Lambda function
+    num1 = float(event['num1'])
+    num2 = float(event['num2'])
+    operation = event['operation']
 
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
+    # perform operation based on input
+    if operation == 'add':
+        result = add(num1, num2)
+    elif operation == 'subtract':
+        result = subtract(num1, num2)
+    elif operation == 'multiply':
+        result = multiply(num1, num2)
+    elif operation == 'divide':
+        result = divide(num1, num2)
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
-
+    # otherwise return a 400 error
+    else:
+        return {
+            'statusCode': 400,
+            'body': json.dumps('invalid operation')
+        }
+    
+    # return result as json object
     return {
-        "statusCode": 200,
-        "body": json.dumps({
-            "message": "suck all dem tiger monkeys",
-            # "location": ip.text.replace("\n", "")
-        }),
+        'statusCode': 200,
+        'body': json.dumps(result)
     }
