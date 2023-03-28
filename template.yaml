@@ -20,7 +20,7 @@ Resources:
       CodeUri: .
       # This is where function is in the file
       Handler: calculator.lambda_handler
-      Runtime: python3.10
+      Runtime: python3.9
       Architectures:
         - x86_64
       Events:
