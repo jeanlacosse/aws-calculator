@@ -3,11 +3,11 @@
         {
             "type": "aws-sam",
             "request": "direct-invoke",
-            "name": "hello-world-sam:HelloWorldFunction",
+            "name": "sam-calculator:SamCalculatorFunction",
             "invokeTarget": {
                 "target": "template",
                 "templatePath": "${workspaceFolder}/template.yaml",
-                "logicalId": "HelloWorldFunction"
+                "logicalId": "SamCalculatorFunction"
             },
             "lambda": {
                 "payload": {},
