@@ -16,8 +16,8 @@ Resources:
   SamCalculatorFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      # here is path to lambda function in calculator.py
-      CodeUri: .
+      # here is path to lambda function where calculator.py is in
+      CodeUri: ./app/
       # This is where function is in the file
       Handler: calculator.lambda_handler
       Runtime: python3.9

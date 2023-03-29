@@ -14,9 +14,19 @@ def divide(num1, num2):
 
 # lambda function handler
 def lambda_handler(event, context):
-    num1 = float(event['num1'])
-    num2 = float(event['num2'])
-    operation = event['operation']
+
+    # lambda test will look like this
+    # {
+    # "body": "{\"num1\": 5, \"num2\": 10, \"operation\": \"add\"}"
+    # }
+    # this is because the event object structure is different from what API gateway sends to the lambda function
+
+    body = json.loads(event["body"]) # this is needed to format event into a dictionary as the 'body' in the JSON is unreadable otherwise. In quotes
+   
+    num1 = float(body["num1"])
+    num2 = float(body['num2'])
+    operation = body['operation']
+    
 
     # perform operation based on input
     if operation == 'add':
@@ -28,6 +38,7 @@ def lambda_handler(event, context):
     elif operation == 'divide':
         result = divide(num1, num2)
 
+   
     # otherwise return a 400 error
     else:
         return {
