@@ -1,0 +1,68 @@
+# This is whats called a cloud formation template and will provision the AWS
+# resources during the build/deploy stages
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-calculator 
+
+  Sample SAM Template for a serverless calculator application
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  SamCalculatorFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      # here is path to lambda function where calculator.py is in
+      CodeUri: ./app/
+      # This is where function is in the file
+      Handler: calculator.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        # here are the api paths
+        CalculatorAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /calculate
+            # sending data so this would be a post, not a get
+            Method: POST
+
+  ApplicationResourceGroup: # groups resources together for easier management
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Join: # this concatenates the below strings
+          - ""
+          - - ApplicationInsights-SAM-
+            - Ref: AWS::StackName
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring: # monitors and troubleshoots the performance of the serverless app
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Fn::Join:
+          - ""
+          - - ApplicationInsights-SAM-
+            - Ref: AWS::StackName
+      AutoConfigurationEnabled: "true"
+    DependsOn: ApplicationResourceGroup
+Outputs: # defines a set of output values that are genereate by the CloudFormation stack
+  # These outputs can be used to reference the resources in other parts of the AWS infrastructure
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  SamCalculatorApi:
+    Description: API Gateway endpoint URL for Prod stage for Calculator function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/calculate/"
+  SamCalculatorFunction:
+    Description: Calculator Lambda Function ARN
+    Value: !GetAtt SamCalculatorFunction.Arn # (Amazon Resource Name) for the lambda function
+  SamCalculatorFunctionIamRole:
+    Description: Implicit IAM Role created for Calculator function
+    Value: !GetAtt SamCalculatorFunctionRole.Arn # creates an IAM role for this function
