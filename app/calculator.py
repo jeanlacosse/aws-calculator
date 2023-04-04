@@ -22,20 +22,22 @@ def lambda_handler(event, context):
     # this is because the event object structure is different from what API gateway sends to the lambda function
 
     body = json.loads(event["body"]) # this is needed to format event into a dictionary as the 'body' in the JSON is unreadable otherwise. In quotes
-   
+
+    print( 'event is here now:', event )
+
     num1 = float(body["num1"])
     num2 = float(body['num2'])
     operation = body['operation']
     
 
     # perform operation based on input
-    if operation == 'add':
+    if operation == '+':
         result = add(num1, num2)
-    elif operation == 'subtract':
+    elif operation == '-':
         result = subtract(num1, num2)
-    elif operation == 'multiply':
+    elif operation == '*':
         result = multiply(num1, num2)
-    elif operation == 'divide':
+    elif operation == '/':
         result = divide(num1, num2)
 
    
@@ -46,8 +48,16 @@ def lambda_handler(event, context):
             'body': json.dumps('invalid operation')
         }
     
+    
     # return result as json object
     return {
         'statusCode': 200,
-        'body': json.dumps(result)
+        'headers': {
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST'
+        },
+        'body': json.dumps({'result': result})
     }
+
+
