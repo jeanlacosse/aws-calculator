@@ -241,4 +241,7 @@ $RECYCLE.BIN/
 
 */build/*
 
+# template.yaml file, this shoudl only be temporary and fix this w AWS secrets manager or something similar
+*template.yaml
+
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
