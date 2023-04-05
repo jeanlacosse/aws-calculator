@@ -2,6 +2,16 @@ import json
 import os # this is where the environment variables from the template .yaml file are stored in a dictionary, can be used after the build
 import psycopg2
 import psycopg2.extras
+import boto3
+
+# use this to get the secure string from the parameter store as secure strings cannot be accessed from SAM CLI apps yet
+def get_db_password():
+    ssm_client = boto3.client('ssm')
+    response = ssm_client.get_parameter(
+        Name='/basic-calculator/dev/DB_PASSWORD',
+        WithDecryption=True
+    )
+    return response['Parameter']['Value']
 
 def add(num1, num2):
     return num1 + num2
@@ -50,7 +60,7 @@ def lambda_handler(event, context):
     db_host = os.environ['DB_HOST']
     db_port = os.environ['DB_PORT']
     db_user = os.environ['DB_USER']
-    db_password = os.environ['DB_PASSWORD']
+    db_password = get_db_password() # call function to get decrypted password from AWS
     db_name = os.environ['DB_NAME']
 
     # connect to the PostgreSQL database

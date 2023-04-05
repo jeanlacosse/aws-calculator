@@ -34,11 +34,20 @@ Resources:
       # add in the environment variables for the database to use
       Environment:
         Variables:
-          DB_HOST: my-postgres-instance.c8duuidz6dkm.us-east-2.rds.amazonaws.com
-          DB_PORT: 5432
-          DB_USER: jeanluclacosse
-          DB_PASSWORD: Cloudbaby123
-          DB_NAME: my-postgres-instance
+          DB_HOST: !Ref DbHostParameter
+          DB_PORT: !Ref DbPortParameter
+          DB_USER: !Ref DbUserParameter
+          DB_NAME: !Ref DbNameParameter
+
+      # this allows my IAM policy to read params frmo the param store
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:GetParameters
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/basic-calculator/dev/*"
 
   ApplicationResourceGroup: # groups resources together for easier management
     Type: AWS::ResourceGroups::Group
@@ -74,3 +83,18 @@ Outputs: # defines a set of output values that are genereate by the CloudFormati
   SamCalculatorFunctionIamRole:
     Description: Implicit IAM Role created for Calculator function
     Value: !GetAtt SamCalculatorFunctionRole.Arn # creates an IAM role for this function
+
+# this grabs the parameters from the parameter store before deployment and inserts them into the environment variables
+Parameters:
+  DbHostParameter:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /basic-calculator/dev/DB_HOST
+  DbPortParameter:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /basic-calculator/dev/DB_PORT
+  DbUserParameter:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /basic-calculator/dev/DB_USER
+  DbNameParameter:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /basic-calculator/dev/DB_NAME

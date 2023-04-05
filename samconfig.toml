@@ -21,6 +21,7 @@ s3_prefix = "sam-calculator"
 region = "us-east-2"
 disable_rollback = true
 image_repositories = []
+parameter_overrides = "DbHostParameter=\"/basic-calculator/dev/DB_HOST\" DbPortParameter=\"/basic-calculator/dev/DB_PORT\" DbUserParameter=\"/basic-calculator/dev/DB_USER\" DbNameParameter=\"/basic-calculator/dev/DB_NAME\""
 
 [default.package.parameters]
 resolve_s3 = true
