@@ -42,6 +42,8 @@ def create_table_if_not_exists(conn):
         cursor.execute(create_table_query)
         conn.commit()
 
+    print('create_table_query activated')
+
 # insert the calculation data into the calculations table
 def insert_calculation(conn, num1, num2, operation, result): # these values are what are being placed into the % in VALUES
     insert_query = '''
@@ -52,6 +54,8 @@ def insert_calculation(conn, num1, num2, operation, result): # these values are 
     with conn.cursor() as cursor:
         cursor.execute(insert_query, (num1, num2, operation, result))
         conn.commit()
+    
+    print('insertion to db worked, values inserted are', num1, num2, operation, result)
 
 # lambda function handler
 def lambda_handler(event, context):
@@ -63,7 +67,10 @@ def lambda_handler(event, context):
     db_password = get_db_password() # call function to get decrypted password from AWS
     db_name = os.environ['DB_NAME']
 
+    print('grabbing values from AWS, these are', db_host, db_name, db_password, db_port, db_user)
+
     # connect to the PostgreSQL database
+    print('connecting to the database')
     conn = psycopg2.connect(
         host=db_host,
         port=db_port,
@@ -71,18 +78,10 @@ def lambda_handler(event, context):
         password=db_password,
         dbname=db_name
     )
+    print('connected to the database')
 
     # Create the 'calculations' table if it doesn't exist
     create_table_if_not_exists(conn)
-
-    # DB operations go here
-    # Insert the calculation data into the 'calculations' table
-    insert_calculation(conn, num1, num2, operation, result)
-
-    # close the database connection
-    conn.close()
-
-
 
     # lambda test will look like this
     # {
@@ -116,6 +115,13 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': json.dumps('invalid operation')
         }
+    
+    # DB operations go here
+    # Insert the calculation data into the 'calculations' table
+    insert_calculation(conn, num1, num2, operation, result)
+
+    # close the database connection
+    conn.close()
     
     
     # return result as json object

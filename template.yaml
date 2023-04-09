@@ -13,6 +13,12 @@ Globals:
     Timeout: 3
 
 Resources:
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for the Lambda function
+      VpcId: !Ref VPCId # Reference to your VPC ID
+
   SamCalculatorFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -38,6 +44,14 @@ Resources:
           DB_PORT: !Ref DbPortParameter
           DB_USER: !Ref DbUserParameter
           DB_NAME: !Ref DbNameParameter
+
+      VpcConfig:
+        SecurityGroupIds:
+          - !GetAtt LambdaSecurityGroup.GroupId
+        SubnetIds:
+          - !Ref SubnetA
+          - !Ref SubnetB
+          - !Ref SubnetC
 
       # this allows my IAM policy to read params frmo the param store
       Policies:
@@ -98,3 +112,23 @@ Parameters:
   DbNameParameter:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /basic-calculator/dev/DB_NAME
+
+  VPCId:
+    Type: String
+    Description: The VPC ID where your RDS instance is located.
+    Default: vpc-058c05cec7466bc70
+
+  SubnetA:
+    Type: String
+    Description: The VPC subnet ID the lambda function will run in
+    Default: subnet-0692d8daba0b1e71f
+
+  SubnetB:
+    Type: String
+    Description: The VPC subnet ID the lambda function will run in
+    Default: subnet-0a286f66a69910b1a
+
+  SubnetC:
+    Type: String
+    Description: The VPC subnet ID the lambda function will run in
+    Default: subnet-0d6ab4a1e72d90103
