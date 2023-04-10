@@ -5,7 +5,7 @@ codeuri = "C:\\Users\\jeanl\\Documents\\Coding\\aws-tutorials\\aws-calculator-ba
 runtime = "python3.9"
 architecture = "x86_64"
 handler = "calculator.lambda_handler"
-manifest_hash = "7c3836c6c07a70f79e5bdf9b6499b5bd"
+manifest_hash = "63bc4508645bd3d39bf26a258dda1121"
 packagetype = "Zip"
 functions = ["SamCalculatorFunction"]
 

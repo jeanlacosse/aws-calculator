@@ -10,7 +10,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 8
+    Timeout: 10
 
 Resources:
   LambdaSecurityGroup:
@@ -44,6 +44,7 @@ Resources:
           DB_PORT: !Ref DbPortParameter
           DB_USER: !Ref DbUserParameter
           DB_NAME: !Ref DbNameParameter
+          DB_PASSWORD: !Ref DbPasswordParameter
 
       VpcConfig:
         SecurityGroupIds:
@@ -69,7 +70,8 @@ Resources:
               Action:
                 - ssm:GetParameter
                 - ssm:GetParameters
-              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/basic-calculator/dev/*"
+              Resource:
+                - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/basic-calculator/dev/*"
 
   # creating a vpc endpoint for this lambda to use ssm
   VPCEndpointSSM:
@@ -135,6 +137,9 @@ Parameters:
   DbNameParameter:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /basic-calculator/dev/DB_NAME
+  DbPasswordParameter:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /basic-calculator/dev/DB_PASSWORD
 
   VPCId:
     Type: String
