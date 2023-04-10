@@ -10,7 +10,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 8
 
 Resources:
   LambdaSecurityGroup:
@@ -53,8 +53,16 @@ Resources:
           - !Ref SubnetB
           - !Ref SubnetC
 
-      # this allows my IAM policy to read params frmo the param store
       Policies:
+        # allows apigateway to invoke this
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: "*"
+
+        # this allows my IAM policy to read params frmo the param store
         - Version: "2012-10-17"
           Statement:
             - Effect: Allow
@@ -62,6 +70,21 @@ Resources:
                 - ssm:GetParameter
                 - ssm:GetParameters
               Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/basic-calculator/dev/*"
+
+  # creating a vpc endpoint for this lambda to use ssm
+  VPCEndpointSSM:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPCId
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref SubnetA
+        - !Ref SubnetB
+        - !Ref SubnetC
+      SecurityGroupIds:
+        - !GetAtt LambdaSecurityGroup.GroupId
 
   ApplicationResourceGroup: # groups resources together for easier management
     Type: AWS::ResourceGroups::Group
@@ -117,17 +140,14 @@ Parameters:
     Type: String
     Description: The VPC ID where your RDS instance is located.
     Default: vpc-058c05cec7466bc70
-
   SubnetA:
     Type: String
     Description: The VPC subnet ID the lambda function will run in
     Default: subnet-0692d8daba0b1e71f
-
   SubnetB:
     Type: String
     Description: The VPC subnet ID the lambda function will run in
     Default: subnet-0a286f66a69910b1a
-
   SubnetC:
     Type: String
     Description: The VPC subnet ID the lambda function will run in
