@@ -4,22 +4,6 @@ import psycopg2
 import psycopg2.extras
 # import boto3
 
-# N/A to use this, securestring not working with boto3 while in VPC, will leave commented out
-# use this to get the secure string from the parameter store as secure strings cannot be accessed from SAM CLI apps yet
-# def get_db_password():
-#     try:
-#         print('initializing SSM client...')
-#         ssm_client = boto3.client('ssm')
-#         print('client initialized, getting parameter')
-#         response = ssm_client.get_parameter(
-#             Name='/basic-calculator/dev/DB_PASSWORD',
-#             WithDecryption=True
-#         )
-#         print('Parameter recieved, SSM response:', response)
-#         return response['Parameter']['Value']
-#     except Exception as e:
-#         print('Error getting DB_PASS from SSM:', e)
-
 def add(num1, num2):
     return num1 + num2
 
@@ -66,6 +50,22 @@ def insert_calculation(conn, num1, num2, operation, result): # these values are 
         conn.commit()
     
     print('insertion to db worked, values inserted are', num1, num2, operation, result)
+
+# gets all calculations once the post is triggered
+def get_past_calculations(conn):
+    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        cursor.execute("SELECT * FROM calculations")
+        rows = cursor.fetchall()
+        past_calculations = [
+            {
+                "num1": float(row["num1"]),  # Convert Decimal to float
+                "num2": float(row["num2"]),  # Convert Decimal to float
+                "operation": row["operation"],
+                "result": float(row["result"]),  # Convert Decimal to float
+            }
+            for row in rows
+        ]
+    return past_calculations
 
 # lambda function handler
 def lambda_handler(event, context):
@@ -140,6 +140,8 @@ def lambda_handler(event, context):
     # Insert the calculation data into the 'calculations' table
     insert_calculation(conn, num1, num2, operation, result)
 
+    past_calculations = get_past_calculations(conn)
+
     # close the database connection
     conn.close()
     
@@ -152,7 +154,10 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': 'http://react-calculator-basic-client-source-code.s3-website.us-east-2.amazonaws.com',
             'Access-Control-Allow-Methods': 'OPTIONS,POST'
         },
-        'body': json.dumps({'result': result})
+        'body': json.dumps({
+            'result': result,
+            'past_calculations': past_calculations
+        })
     }
 
 
